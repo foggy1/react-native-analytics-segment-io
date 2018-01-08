@@ -34,6 +34,9 @@ static NSString * const kSEGTrackAttributionDataKey = @"trackAttributionData";
 static NSString * const kSEGTrackDeepLinksKey = @"trackDeepLinks";
 static NSString * const kSEGDebugKey = @"debug";
 
+static NSString * const kSEGContextKey = @"context";
+static NSString * const kSEGIntegrationsKey = @"integrations";
+
 @implementation RNASegmentIO
 
 RCT_EXPORT_MODULE()
@@ -155,29 +158,34 @@ RCT_EXPORT_METHOD(setup:(NSString *)key
     resolve(@(YES));
 }
 
-RCT_EXPORT_METHOD(identify:(NSString *)userId :(NSDictionary *)traits)
+RCT_EXPORT_METHOD(identify:(NSString *)userId traits:(NSDictionary *)traits context:(NSDictionary *)context integrations:(NSDictionary *)integrations)
 {
-    [[SEGAnalytics sharedAnalytics] identify:userId traits:traits];
+    NSDictionary *options = [RNASegmentIO optionsWithContext:context integrations:integrations];
+    [[SEGAnalytics sharedAnalytics] identify:userId traits:traits options:options;
 }
 
-RCT_EXPORT_METHOD(track:(NSString *)event properties:(NSDictionary *)properties)
+RCT_EXPORT_METHOD(track:(NSString *)event properties:(NSDictionary *)properties context:(NSDictionary *)context integrations:(NSDictionary *)integrations)
 {
-    [[SEGAnalytics sharedAnalytics] track:event properties:properties];
+    NSDictionary *options = [RNASegmentIO optionsWithContext:context integrations:integrations];
+    [[SEGAnalytics sharedAnalytics] track:event properties:properties options:options];
 }
 
-RCT_EXPORT_METHOD(screen:(NSString *)name :(NSDictionary *)properties)
+RCT_EXPORT_METHOD(screen:(NSString *)name properties:(NSDictionary *)properties context:(NSDictionary *)context integrations:(NSDictionary *)integrations)
 {
-    [[SEGAnalytics sharedAnalytics] screen:name properties:properties];
+    NSDictionary *options = [RNASegmentIO optionsWithContext:context integrations:integrations];
+    [[SEGAnalytics sharedAnalytics] screen:name properties:properties options:options];
 }
 
-RCT_EXPORT_METHOD(group:(NSString *)groupId :(NSDictionary *)traits)
+RCT_EXPORT_METHOD(group:(NSString *)groupId traits:(NSDictionary *)traits context:(NSDictionary *)context integrations:(NSDictionary *)integrations)
 {
-    [[SEGAnalytics sharedAnalytics] group:groupId traits:traits];
+    NSDictionary *options = [RNASegmentIO optionsWithContext:context integrations:integrations];
+    [[SEGAnalytics sharedAnalytics] group:groupId traits:traits options:options];
 }
 
-RCT_EXPORT_METHOD(alias:(NSString *)newId)
+RCT_EXPORT_METHOD(alias:(NSString *)newId context:(NSDictionary *)context integrations:(NSDictionary *)integrations)
 {
-    [[SEGAnalytics sharedAnalytics] alias:newId];
+    NSDictionary *options = [RNASegmentIO optionsWithContext:context integrations:integrations];
+    [[SEGAnalytics sharedAnalytics] alias:newId options:options];
 }
 
 RCT_EXPORT_METHOD(reset)
@@ -211,6 +219,13 @@ RCT_EXPORT_METHOD(disable)
         kSEGTrackAttributionDataKey: kSEGTrackAttributionDataKey,
         kSEGTrackDeepLinksKey: kSEGTrackDeepLinksKey,
         kSEGDebugKey: kSEGDebugKey,
+    };
+}
+
++ (NSDictionary *)optionsWithContext:(NSDictionary *)context integrations:(NSDictionary *)integrations {
+    return @{
+        kSEGContextKey: context,
+        kSEGIntegrationsKey: integrations,
     };
 }
 
